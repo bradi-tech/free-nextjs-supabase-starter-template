@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: false
 ---
+## NOTE THAT THAT IS THE SAMPLE, FOR YOUR PROJECT CUSTOMIZE IT FIRST
+
 ## 🎯 MVP Objective
 
 Develop a responsive, minimalistic wedding website builder MVP featuring:
