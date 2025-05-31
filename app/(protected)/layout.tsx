@@ -1,11 +1,13 @@
 import { AppSidebar } from "@/components/molecules/dashboard/app-sidebar";
-import { Breadcrumb, BreadcrumbLink, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/atoms/ui/breadcrumb";
-import { Separator } from "@/components/atoms/ui/separator";
-import { SidebarInset, SidebarTrigger } from "@/components/atoms/ui/sidebar";
+import { SidebarInset } from "@/components/atoms/ui/sidebar";
 import { SidebarProvider } from "@/components/atoms/ui/sidebar";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-
+import { DataTable } from "@/components/molecules/dashboard/data-table";
+import { ChartAreaInteractive } from "@/components/molecules/dashboard/chart-area-interactive";
+import { SectionCards } from "@/components/molecules/dashboard/section-cards";
+import { SiteHeader } from "@/components/molecules/dashboard/site-header";
+import data from "../../public/data.json"
 
 export default async function ProtectedLayout({
     children,
@@ -23,32 +25,32 @@ export default async function ProtectedLayout({
     }
 
     return (
-        <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2">
-                    <div className="flex items-center gap-2 px-4">
-                        <SidebarTrigger className="-ml-1" />
-                        <Separator orientation="vertical" className="mr-2 h-4" />
-                        <Breadcrumb>
-                            <BreadcrumbList>
-                                <BreadcrumbItem className="hidden md:block">
-                                    <BreadcrumbLink href="#">
-                                        Building Your Application
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                <BreadcrumbSeparator className="hidden md:block" />
-                                <BreadcrumbItem>
-                                    <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                                </BreadcrumbItem>
-                            </BreadcrumbList>
-                        </Breadcrumb>
-                    </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                    {children}
+        <SidebarProvider
+        style={
+          {
+            "--sidebar-width": "calc(var(--spacing) * 72)",
+            "--header-height": "calc(var(--spacing) * 12)",
+          } as React.CSSProperties
+        }
+      >
+        <AppSidebar variant="inset" />
+        <SidebarInset>
+          <SiteHeader />
+          <div className="flex flex-1 flex-col">
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+                      {children}
+             </div>
+            <div className="@container/main flex flex-1 flex-col gap-2">
+              <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                <SectionCards />
+                <div className="px-4 lg:px-6">
+                  <ChartAreaInteractive />
                 </div>
-            </SidebarInset>
-        </SidebarProvider>
+                <DataTable data={data} />
+              </div>
+            </div>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
     );
 }

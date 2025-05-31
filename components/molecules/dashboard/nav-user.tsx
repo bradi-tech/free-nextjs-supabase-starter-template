@@ -1,11 +1,12 @@
 "use client"
 
 import {
-  BadgeCheck,
-  Bell,
-  LogOut,
-  Sparkles,
-} from "lucide-react"
+  IconCreditCard,
+  IconDotsVertical,
+  IconLogout,
+  IconNotification,
+  IconUserCircle,
+} from "@tabler/icons-react"
 
 import {
   Avatar,
@@ -27,7 +28,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/atoms/ui/sidebar"
-import { CaretSortIcon, ComponentPlaceholderIcon } from "@radix-ui/react-icons"
 
 export function NavUser({
   user,
@@ -49,15 +49,17 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
+              <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-medium">{user.name}</span>
+                <span className="text-muted-foreground truncate text-xs">
+                  {user.email}
+                </span>
               </div>
-              <CaretSortIcon className="ml-auto size-4" />
+              <IconDotsVertical className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -73,36 +75,31 @@ export function NavUser({
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="text-muted-foreground truncate text-xs">
+                    {user.email}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-           
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-            
+                <IconUserCircle />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-               
+                <IconCreditCard />
                 Billing
               </DropdownMenuItem>
               <DropdownMenuItem>
-      
+                <IconNotification />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-             
+              <IconLogout />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
