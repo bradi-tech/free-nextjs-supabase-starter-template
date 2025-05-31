@@ -33,7 +33,7 @@ export const updateSession = async (request: NextRequest) => {
 
     // protected routes
     if (request.nextUrl.pathname.startsWith('/dashboard') && user.error) {
-      return NextResponse.redirect(new URL('/sign-in', request.url));
+      return NextResponse.redirect(new URL('/login', request.url));
     }
 
     if ((request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register' || request.nextUrl.pathname === '/forgot-password') && !user.error) {

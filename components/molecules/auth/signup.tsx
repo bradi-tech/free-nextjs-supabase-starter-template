@@ -258,8 +258,8 @@ export default function SignUp({ redirectTo }: { redirectTo: string }) {
 							<Link
 								href={
 									redirectTo
-										? `/signin?next=` + redirectTo
-										: "/signin"
+										? `/login?next=` + redirectTo
+										: "/login"
 								}
 								className="text-blue-400"
 							>

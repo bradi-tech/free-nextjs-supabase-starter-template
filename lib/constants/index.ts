@@ -1,2 +1,2 @@
 export const protectedPaths = ["/dashboard"];
-export const authPaths = ["/register", "/signin"];
+export const authPaths = ["/register", "/login"];

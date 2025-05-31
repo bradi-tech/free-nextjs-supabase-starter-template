@@ -1,0 +1,290 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## Project General Rules
+
+### `page.tsx` Files Must Be Server Components
+
+Rule:
+
+All page.tsx files must be defined as Server Components (meaning "use client" should not be written).
+
+- Data fetching operations should be done within the server component.
+- If interactive processing is required on the UI side, this logic should be separated into a child client component.
+- Data needed by client components should be fetched by the server component and passed as props to the client component.
+- The data model needed by the client component should, as much as possible, use existing models defined in `models.ts`.
+
+**Application Example:**
+
+TypeScript
+
+```
+// app/products/page.tsx
+import ProductList from '@/components/organisms/ProductList';
+export default function ProductsPage() {
+  // Assuming 'products' data is fetched here or passed down
+  return (
+    <Suspense loading={<LoadingComponent />}>
+      <ProductList />;
+    </Suspense>
+  );
+}
+
+// components/organisms/ProductList.tsx
+import { getProductsByTenant } from '@/lib/actions';
+import ProductCard from '@/components/molecules/ProductCard';
+
+export default async function ProductList() { // Renamed function to avoid conflict
+  const products = await getProductsByTenant();
+  return (
+    <div>
+      {/* Assuming ProductList or similar component handles mapping internally */}
+      {/* Or if mapping directly: */}
+      {/* {products.map((p) => (
+        <ProductCard key={p.id} productData={p} />
+      ))} */}
+      {/* Render ProductList or map products here */}
+    </div>
+  );
+}
+
+
+// components/molecules/ProductCard.tsx
+'use client';
+import { Brand } from '@/models'; // Assuming Brand is the correct model type
+import ProductComponent from '@/components/molecules/ProductComponent'; // Assuming ProductComponent exists
+export default function ProductCard({ products }: { products: Brand[] }) { // Corrected prop type usage
+  return (
+    <div>
+      {products.map((p) => (
+        // <ProductComponent key={p.id} productData={p} />
+        // Render individual product representation here
+        <div key={p.id}>{p.name}</div> // Example placeholder
+      ))}
+    </div>
+  );
+}
+```
+
+### `useMutation` Usage
+
+Rule:
+
+Mutations must check the response success status and throw an error using throw. The mutate function should be renamed for ready use. Button or UI elements can be disabled during the operation.
+
+**Field Descriptions:**
+
+- `mutationFn`: The function that makes the actual API call. Must throw an error with `throw`.
+- `onSuccess`: Function to run when the API call is successful.
+- `onError`: Runs when an error is thrown; the error message can be toasted here.
+- `isPending`: Becomes `true` while the mutation operation is in progress. Previously known as `isLoading`.
+
+**Template:**
+
+TypeScript
+
+```
+const {
+  mutate: serverDeleteProfile,
+  isPending: isLoadingDeleteProfile,
+  error: isErrorDeleteProfile, // Note: 'error' holds the error object, not a boolean typically
+} = useMutation({
+  mutationFn: async (profileId: string) => {
+    const response = await deleteProfile(profileId); // Assuming deleteProfile API call exists
+    // The original check was `if (response.success) throw...` which seems incorrect.
+    // Usually, you throw if it's NOT successful. Assuming that's the intent:
+    if (!response.success) throw new Error(response.error || 'Failed to delete profile');
+    return response.data;
+  },
+  onSuccess: () => {
+    router.refresh(); // Assuming router is available
+    toast.success('Member removed successfully!'); // Assuming toast is available
+  },
+  onError: (error) => {
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    toast.error(errorMessage); // Assuming toast is available
+  },
+});
+```
+
+**Usage:**
+
+TypeScript
+
+```
+<button onClick={() => serverDeleteProfile(profileId)} disabled={isLoadingDeleteProfile}>
+  {isLoadingDeleteProfile ? 'Deleting...' : 'Delete'}
+</button>
+```
+
+**Note:** The `isPending` state is crucial for providing feedback to the user while an operation is ongoing. Disabling buttons during the operation is very important for UX.
+
+### `useQuery` Usage
+
+Rule:
+
+useQuery should be used for data fetching, and the queryKey must be meaningful. Options like enabled and staleTime should be configured based on needs.
+
+**Field Descriptions:**
+
+- `queryKey`: The cache key for the query. Must be unique. Queries with the same key share the cache.
+- `queryFn`: The function that actually fetches the data.
+- `enabled`: Can be `true`/`false`. Controls whether the query runs automatically. For example, use `!!param` to prevent fetching if a parameter is empty.
+- `staleTime`: Specifies how long the data is considered "fresh" in milliseconds. Refetching does not occur during this period.
+- `meta`: Provides extra metadata. Custom messages for error situations can be defined (e.g., `meta.errorMessage`).
+
+**Template:**
+
+TypeScript
+
+```
+const {
+  data: catalogDetailsData,
+  isLoading: isLoadingCatalogDetails,
+  error: isErrorCatalogDetails, // Holds the error object
+  isSuccess: isSuccessCatalogDetails,
+} = useQuery({
+  queryKey: ['catalogDetails', catalogId], // catalogId should be defined
+  queryFn: () => getCatalogDetailsByTenantId(catalogId), // Assuming this function exists
+  enabled: !!catalogId, // Only run if catalogId is truthy
+  staleTime: 5000, // 5 seconds
+  meta: {
+    errorMessage: 'An error occurred while fetching catalog details',
+  },
+});
+```
+
+**Usage:**
+
+TypeScript
+
+```
+if (isLoadingCatalogDetails) return <Skeleton />; // Assuming Skeleton component exists
+if (isErrorCatalogDetails) return <p>An error occurred.</p>; // Or use meta.errorMessage
+// Assuming CatalogDetailCard component exists
+return <CatalogDetailCard data={catalogDetailsData} />;
+```
+
+**Note:** The `isLoading` flag is important for giving correct feedback to the user, especially on page load or after an action while waiting for a response. Showing visual cues like spinners or skeletons instead of a blank screen improves UX quality.
+
+### Form Creation (`zod` + `react-hook-form` + `useMutation`)
+
+Rule:
+
+Use zod for form validation, react-hook-form for form state management, and useMutation for data submission.
+
+**Example:**
+
+TypeScript
+
+```
+// Define Zod schema
+const schema = z.object({
+  name: z.string().min(1, { message: "Name is required" }), // Added error message
+});
+
+// Setup form with react-hook-form
+const form = useForm({
+  resolver: zodResolver(schema),
+});
+
+// Setup mutation with useMutation
+const {
+  mutate: serverCreateBrand,
+  isPending: isLoadingCreateBrand,
+} = useMutation({
+  mutationFn: async (data: z.infer<typeof schema>) => { // Added type for data
+    const response = await createBrand(data); // Assuming createBrand API call exists
+    if (!response.success) throw new Error(response.error || 'Creation failed');
+    return response.data;
+  },
+  onSuccess: () => {
+    toast.success('Brand created'); // Assuming toast is available
+    form.reset(); // Reset form fields
+  },
+  onError: (error) => {
+    toast.error(error instanceof Error ? error.message : 'An unknown error occurred'); // Assuming toast is available
+  },
+});
+
+// Handle form submission
+const handleSubmit = (data: z.infer<typeof schema>) => {
+  serverCreateBrand(data);
+};
+
+// Render the form
+<form onSubmit={form.handleSubmit(handleSubmit)}>
+  <input {...form.register('name')} />
+  {form.formState.errors.name && <p>{form.formState.errors.name.message}</p>}
+  <button type="submit" disabled={isLoadingCreateBrand}>
+    {isLoadingCreateBrand ? 'Creating...' : 'Create'}
+  </button>
+</form>
+```
+
+### Defining Helper Functions in `utils.ts`
+
+Rule:
+
+Repeated, independent, and small helper functions should be kept in separate files like utils.ts.
+
+**Example:**
+
+TypeScript
+
+```
+// utils.ts
+export function capitalize(str: string): string { // Added return type
+  if (!str) return ''; // Added edge case handling
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+```
+
+### Defining Models (Interfaces) in `models.ts`
+
+Rule:
+
+All interface and type definitions for API responses, form inputs, or shared data structures should be collected in models.ts.
+
+**Example:**
+
+TypeScript
+
+```
+// models.ts
+export interface Brand {
+  id: string;
+  name: string;
+  createdAt: string; // Or Date type if preferred
+}
+```
+
+### Atomic Design
+
+Rule:
+
+Components should be placed in atoms, molecules, organisms, and pages folders according to Atomic Design principles.
+
+**Definitions:**
+
+- **atoms:** Smallest parts like Button, Input, Label.
+- **molecules:** Composed of multiple atoms, like FormField, ModalHeader.
+- **organisms:** Structures like Modal, CardList.
+- **pages:** `page.tsx` files in the `app/` directory and specific page layouts.
+
+**Example Folder Structure:**
+
+```
+components/
+├── atoms/
+│   └── Button.tsx
+├── molecules/
+│   └── FormField.tsx
+├── organisms/
+│   └── BrandModal.tsx
+└── pages/          // Note: Per Next.js convention, pages are usually in `app/`
+    └── BrandPage.tsx // Example, might be `app/brands/page.tsx`
+
+```

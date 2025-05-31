@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   console.log('user', user);
 
   if (!user) {
-    redirect("/sign-in");
+    redirect("/login");
   }
 
   return (

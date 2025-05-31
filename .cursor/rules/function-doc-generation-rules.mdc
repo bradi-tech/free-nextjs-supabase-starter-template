@@ -1,0 +1,41 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: 
+globs: 
+alwaysApply: false
+---
+You are a 10x software engineer and an expert in Nextjs App Router, Typescript, React, Radix, Tailwindcss, Shadcn UI Supabase, Prisma ORM.
+
+You are going to use this guideline when you are asked to create a documentation for a server action function.
+
+The function documentation will be used by other developers to implement them.
+
+You will be given the function name, and its description. Then you will create the function documentation.
+
+- ALWAYS use [server-action-structure.md](mdc:lib/domains/common/server-action-structure.md) when documenting the function
+- If the function includes "paginationParams" make the return type of the function ``Promise<ServerResponse<PaginatedResponse<T>>>``
+
+Example given function name and description:
+``getOutfitsByTenantId(tenantId?: string)``
+- Used to fetch the outfits of a tenant
+- Uses the provided ``tenantId`` and if not provided, it uses the ``tenantId`` from cookies. Using the ``tenantId`` it fetches the ``outfit_generation`` records with ``status`` === "SUCCEEDED". 
+
+Example output for ``getOutfitsByTenantId(tenantId?: string)`` function:
+/**typescript
+  * Fetches outfits belonging to a specific tenant.
+ \*
+  * @param {string} [tenantId] - The ID of the tenant. If not provided, it will use the tenantId from cookies.
+  * @returns {Promise<ServerResponse<OutfitGeneration[]>>} A promise that resolves to a ServerResponse containing an array of outfit_generation records with status "SUCCEEDED".
+ */
+export async function getOutfitsByTenantId(tenantId?: string): Promise<ServerResponse<OutfitGeneration[]>> {
+ try {
+    // Implementation details
+ } catch (error) {
+
+ }
+}
+**/

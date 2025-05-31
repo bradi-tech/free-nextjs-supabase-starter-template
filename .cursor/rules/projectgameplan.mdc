@@ -1,0 +1,155 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+## 🎯 MVP Objective
+
+Develop a responsive, minimalistic wedding website builder MVP featuring:
+
+* User authentication via Supabase Auth
+* A dashboard for managing wedding websites
+* Three customizable templates (editable titles and images)
+* PostgreSQL database managed with Prisma ORM
+* Email notifications using Resend([Stack Overflow][1])
+
+---
+
+## 🧑‍💻 User Roles
+
+* **Authenticated Users**: Can create and manage wedding websites
+* **Guests**: Can view the public wedding website pages([Reddit][2])
+
+---
+
+## 🧩 Feature Breakdown
+
+### 1. **Authentication**
+
+* Implement Supabase Auth for user registration and login
+* Secure routes to ensure only authenticated users can access the dashboard
+
+[1]: https://stackoverflow.com/questions/7246419/wedding-website-rsvp-database?utm_source=chatgpt.com "Wedding website RSVP database [closed] - Stack Overflow"
+[2]: https://www.reddit.com/r/userexperience/comments/1it1eum/full_ux_design_process_vs_mvp_product_development/?utm_source=chatgpt.com "Full UX Design Process vs MVP Product Development - Reddit"
+
+
+Here's your concise, detailed game plan ready for copy-pasting directly into Cursor, clearly outlining features, UI/UX, and PostgreSQL DB schema:
+
+---
+
+## 🎯 **MVP Objective**
+
+Create a responsive, minimalistic wedding website builder MVP, allowing users to select and customize templates (initially 3), changing titles and images.
+
+---
+
+## 📦 **Tech Stack**
+
+* **Frontend:** Next.js, ReactJS, TypeScript
+* **Backend/Auth:** Supabase Auth, Prisma ORM
+* **Database:** PostgreSQL
+* **Email:** Resend
+
+---
+
+## 📌 **Main Features**
+
+### 1. **User Authentication**
+
+* Sign-up/Login (Supabase Auth)
+* Secure routes for authenticated users only
+
+### 2. **Dashboard (Responsive, Minimal UI)**
+
+* Overview of created wedding websites
+* "Create New Website" button
+
+### 3. **Website Builder**
+
+* Initially 3 predefined templates
+* Customizable fields:
+
+  * Titles/Texts
+  * Images (upload functionality via Supabase Storage)
+* Real-time preview for changes (live editor)
+
+### 4. **Website Management**
+
+* Save & Edit existing websites
+* Publish/Unpublish functionality (public/private)
+
+### 5. **Email Notifications (Resend Integration)**
+
+* Confirmation emails upon website creation
+* Notification upon website publication
+
+---
+
+## 🖥️ **UI/UX Considerations**
+
+* Clean, minimalistic layout
+* Mobile-first, fully responsive
+* Easy navigation with intuitive UX patterns
+* Simple forms and clear feedback mechanisms (success/error alerts)
+
+---
+
+## 🗃️ **PostgreSQL Database Schema**
+
+### Prisma Schema (for copy-pasting):
+
+```prisma
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  createdAt     DateTime  @default(now())
+  websites      Website[]
+}
+
+model Website {
+  id              String       @id @default(cuid())
+  title           String
+  template        String
+  isPublished     Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  userId          String
+  user            User         @relation(fields: [userId], references: [id])
+  images          Image[]
+  texts           TextField[]
+}
+
+model Image {
+  id          String    @id @default(cuid())
+  url         String
+  altText     String?
+  websiteId   String
+  website     Website   @relation(fields: [websiteId], references: [id])
+}
+
+model TextField {
+  id          String    @id @default(cuid())
+  key         String    // identifier of editable text area
+  content     String
+  websiteId   String
+  website     Website   @relation(fields: [websiteId], references: [id])
+}
+```
+
+---
+
+## 🚩 **Next Steps**
+
+* Set up the Next.js and Supabase authentication integration
+* Implement responsive dashboard UI
+* Create the template selection page and editor
+* Integrate Prisma with PostgreSQL
+* Set up image upload and storage with Supabase Storage
+* Implement Resend for transactional emails
+
+---
+
+✅ **Ready to Build!**
+
+
